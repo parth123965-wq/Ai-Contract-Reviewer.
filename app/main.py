@@ -1,9 +1,15 @@
 from fastapi import FastAPI
+from app.core.config import settings
 
-app = FastAPI()
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION
+)
 
 @app.get("/")
-def home():
+def home() -> dict:
     return {
-        "message":"Welcome to AI Contract Reviewer."
+        "message":settings.APP_NAME,
+        "version":settings.APP_VERSION,
+        "debug":settings.DEBUG
     }
