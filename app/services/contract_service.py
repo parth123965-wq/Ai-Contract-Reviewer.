@@ -118,7 +118,6 @@ class ContractService:
             if file_path is not None and Path(file_path).exists():
                 Path(file_path).unlink()
             raise
-                
-                
+                            
 def contract_service() -> ContractService:
     return ContractService()
