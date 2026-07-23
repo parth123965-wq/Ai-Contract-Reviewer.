@@ -1,6 +1,7 @@
-from pydantic import BaseModel , ConfigDict
+from pydantic import BaseModel , ConfigDict 
 from app.models.contract import ContractStatus
 from datetime import datetime
+from typing import List
 
 class ContractResponse(BaseModel):
     id: int
@@ -14,4 +15,4 @@ class ContractResponse(BaseModel):
     )
     
 class ContractListResponse(BaseModel):
-    contracts: list[ContractResponse]
+    contracts: List[ContractResponse]

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.core.config import settings
 from app.api.auth import auth_router
 from app.api.users import users_router
+from app.api.contracts import contract_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -9,6 +10,7 @@ app = FastAPI(
 )
 app.include_router(router=auth_router)
 app.include_router(router=users_router)
+app.include_router(router=contract_router)
 
 @app.get("/")
 def home() -> dict:

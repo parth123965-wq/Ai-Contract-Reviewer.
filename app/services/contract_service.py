@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.contract import Contract , ContractStatus
 from app.models.user import User
 from app.repositories.contract_repository import ContractRepository
-from app.schemas.contract import ContractResponse
+from app.schemas.contract import ContractResponse , ContractListResponse
 from app.core.config import settings
 import shutil
 
@@ -118,6 +118,16 @@ class ContractService:
             if file_path is not None and Path(file_path).exists():
                 Path(file_path).unlink()
             raise
+    
+    def get_user_contracts(
+        self,
+        db: Session,
+        current_user: User
+    ) -> ContractListResponse:
+        return self.contract_repository.get_user_contracts(
+            db=db,
+            user_id=current_user.id
+        )
                             
 def contract_service() -> ContractService:
     return ContractService()

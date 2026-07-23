@@ -24,7 +24,7 @@ class ContractRepository:
         statement = select(Contract).where(
             Contract.id == contract_id
         )
-        return db.execute(statement=statement).scalars().all()
+        return db.execute(statement=statement).scalar_one_or_none()
     
     def get_user_contracts(
         self,
@@ -35,7 +35,7 @@ class ContractRepository:
             Contract.user_id == user_id, 
             Contract.is_deleted.is_(False)
         )
-        return db.execute(statement=statement).scalar_one_or_none()
+        return db.execute(statement=statement).scalars().all()
     
     def update_contract(
         self,

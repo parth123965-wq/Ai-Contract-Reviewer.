@@ -29,7 +29,7 @@ class Contract(Base):
         nullable=False,
         index=True
     )
-    orignal_filename: Mapped[str] = mapped_column(
+    original_filename: Mapped[str] = mapped_column(
         String(255),
         nullable=False
     )
@@ -62,7 +62,7 @@ class Contract(Base):
     )
     deleted_at: Mapped[datetime|None] = mapped_column(
         DateTime(timezone=True),
-        nullable=False
+        nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
