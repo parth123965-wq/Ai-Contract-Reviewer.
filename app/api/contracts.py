@@ -38,3 +38,28 @@ def get_contracts(
     return {
         "contracts": contracts
     }
+    
+@contract_router.get('/{contract_id}',response_model=ContractResponse)
+def get_contract_by_id(
+    db: Annotated[Session,Depends(get_db)],
+    current_user: Annotated[User,Depends(get_current_user)],
+    service: Annotated[ContractService,Depends(contract_service)],
+    contract_id: int
+) -> ContractResponse:
+    return service.get_contract_by_id(
+        db=db,
+        contract_id=contract_id
+    )
+    
+@contract_router.delete('/{id}')
+def delete_contract(
+    db: Annotated[Session,Depends(get_db)],
+    current_user: Annotated[User,Depends(get_current_user)],
+    service: Annotated[ContractService,Depends(contract_service)],
+    id: int
+):
+    service.delete_contract(
+        db=db,
+        contract_id=id
+    )
+    return {"status":"success"}

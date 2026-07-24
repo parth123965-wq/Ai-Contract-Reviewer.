@@ -8,6 +8,7 @@ from app.repositories.contract_repository import ContractRepository
 from app.schemas.contract import ContractResponse , ContractListResponse
 from app.core.config import settings
 import shutil
+from typing import Optional
 
 class ContractService:
     MAX_FILE_SIZE = 20 * 1024 * 1024
@@ -127,6 +128,42 @@ class ContractService:
         return self.contract_repository.get_user_contracts(
             db=db,
             user_id=current_user.id
+        )
+        
+    def get_contract_by_id(
+        self,
+        db: Session,
+        contract_id: int
+    ) -> Optional[Contract]:
+        contract = self.contract_repository.get_contract_by_id(
+            db=db,
+            contract_id=contract_id
+        )
+        if contract == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Contract Not Found."
+            )
+        elif contract.is_deleted == True:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Contract Not Found."
+            )
+        else:
+            return contract
+        
+    def delete_contract(
+        self,
+        db: Session,
+        contract_id: int
+    ) -> Contract:
+        contract = self.get_contract_by_id(
+            db=db,
+            contract_id=contract_id
+        )
+        return self.contract_repository.soft_delete_contract(
+            db=db,
+            contract=contract
         )
                             
 def contract_service() -> ContractService:
