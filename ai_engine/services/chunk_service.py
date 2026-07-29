@@ -3,10 +3,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 class ChunkService:
     
+    CHUNK_SIZE = 1000
+    CHUNK_OVERLAP = 200
+    
     def __init__(self):
         self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size = 1000,
-            chunk_overlap = 200,
+            chunk_size = self.CHUNK_SIZE,
+            chunk_overlap = self.CHUNK_OVERLAP,
             separators=[
                 "\n\n",
                 "\n",
@@ -28,5 +31,5 @@ class ChunkService:
         text: str
     ) -> list[str]:
         self._validate_text(text=text)
-        chunk = self.splitter.split_text(text=text)
-        return chunk
+        chunks = self.splitter.split_text(text=text)
+        return chunks
