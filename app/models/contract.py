@@ -98,7 +98,7 @@ class Contract(Base):
     )
     analyses = relationship(
         "ContractAnalysis",
-        back_populates="contracts"
+        back_populates="contract"
     )
     
 class ContractAnalysis(Base):
@@ -154,5 +154,5 @@ class ContractAnalysis(Base):
     )
     contract = relationship(
         "Contract",
-        back_populates="contract_analyses"
+        back_populates="analyses"
     )

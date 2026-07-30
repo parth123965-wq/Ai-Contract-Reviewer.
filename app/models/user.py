@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean , String , DateTime , func 
-from sqlalchemy.orm import Mapped , mapped_column , Relationship
+from sqlalchemy.orm import Mapped , mapped_column , relationship
 from datetime import datetime
 from app.database.database import Base
 
@@ -12,7 +12,7 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean,default=True,nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),onupdate=func.now(),server_default=func.now())
-    contracts = Relationship(
+    contracts = relationship(
         "Contract",
         back_populates='user',
         cascade='all, delete-orphan'

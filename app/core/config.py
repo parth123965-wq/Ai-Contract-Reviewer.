@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str
     LOG_LEVEL: str
     MODEL_NAME: str
+    COLLECTION_NAME: str
     model_config = SettingsConfigDict(
         env_file='.env',
         extra='ignore'
