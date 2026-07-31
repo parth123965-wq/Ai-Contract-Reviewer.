@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str
     MODEL_NAME: str
     COLLECTION_NAME: str
+    CHROMA_DB_PATH: str
     model_config = SettingsConfigDict(
         env_file='.env',
         extra='ignore'
