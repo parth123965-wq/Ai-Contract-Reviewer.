@@ -8,7 +8,7 @@ class VectorStoreService:
         self.client = chromadb.PersistentClient(
             path=settings.CHROMA_DB_PATH
         )
-        self.collection = self.client.get_or_create_collection("contract")
+        self.collection = self.client.get_or_create_collection(settings.COLLECTION_NAME)
         
     def _validate_store_input(
         self,
@@ -37,7 +37,7 @@ class VectorStoreService:
         user_id: int,
         chunk_index: int,
         version: int
-    ):
+    ) -> dict[str, int|str]:
         return {
             "contract_id": contract_id,
             "user_id": user_id,
@@ -90,13 +90,20 @@ class VectorStoreService:
     def search(
         self,
         contract_id: int,
+        user_id: int,
         query_embedding: list[float],
         top_k: int = 5
     ) -> list[str]:
-        result = self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            where={"contract_id":contract_id}
-        )
-        return result["documents"][0]
+        try:
+            result = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where={"contract_id":contract_id,"user_id":user_id}
+            )
+            documents = result.get("documents",[])
+            if not documents:
+                return []
+            return documents[0]
+        except Exception as exc:
+            raise RuntimeError("Faild to search vector store")from exc
     
