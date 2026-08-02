@@ -22,6 +22,7 @@ class ContractNodes:
     
     def embedding_node(self,state: ContractState) -> ContractState:
         state['embeddings'] = self.embedding_service.create_embeddings(chunks=state['chunks'])
+        state['query_embedding'] = state['embeddings'][0]
         return state
     
     def store_vector_node(self,state: ContractState) -> ContractState:
@@ -34,5 +35,22 @@ class ContractNodes:
         )
         return state
     
-    def retrieve_node(self) -> ContractState:
+    def retrieve_context_node(self,state: ContractState) -> ContractState:
+        state['retrieved_chunks'] = self.vector_store.search(
+            contract_id=state['contract_id'],
+            user_id=state['user_id'],
+            query_embedding=state['query_embedding'],
+        )
+        return state
+    
+    def prompt_node(self,state: ContractState) -> ContractState:
+        pass
+    
+    def llm_node(self,state: ContractState) -> ContractState:
+        pass
+    
+    def parser_node(self,state: ContractState) -> ContractState:
+        pass
+    
+    def save_analysis_node(self,state: ContractState) -> ContractState:
         pass

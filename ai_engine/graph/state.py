@@ -14,3 +14,4 @@ class ContractState(TypedDict):
     analysis_version: int
     status: str
     error: str | None
+    query_embedding: list[float]

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     MODEL_NAME: str
     COLLECTION_NAME: str
     CHROMA_DB_PATH: str
+    AI_MODEL_NAME: str
     model_config = SettingsConfigDict(
         env_file='.env',
         extra='ignore'
