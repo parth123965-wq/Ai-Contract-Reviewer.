@@ -64,7 +64,7 @@ class ContractRepository:
         contract_id: int
     ) -> int:
         latest_version = (
-            db.query(func.max(ContractAnalysis.version))
+            db.query(func.max(ContractAnalysis.analysis_version))
             .filter(ContractAnalysis.contract_id == contract_id)
             .scalar()
         )

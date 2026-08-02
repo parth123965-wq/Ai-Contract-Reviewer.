@@ -1,8 +1,12 @@
 from sqlalchemy.orm import Session
 from ai_engine.schemas.analysis_result import AnalysisResult
 from app.models.contract import ContractAnalysis
+from app.repositories.analysis_repository import AnalysisRepository
 
 class AnalysisService:
+
+    def __init__(self):
+        self.analysis_repository = AnalysisRepository()
 
     def save_analysis(
         self,
@@ -10,16 +14,20 @@ class AnalysisService:
         contract_id: int,
         result: AnalysisResult,
         model_name: str,
-        processing_time: float
+        processing_time_ms: int,
+        analysis_version: int = 1
     ) -> ContractAnalysis:
         analysis = ContractAnalysis(
             contract_id=contract_id,
             summary=result.summary,
-            score=result.risk_score,
-            risk=result.risk,          # We'll calculate this later
-            risk_suggestion="\n".join(result.suggestions),
+            risk_score=result.risk_score,
+            risk_level=result.risk,
+            recommendations="\n".join(result.suggestions),
+            high_risk_clause=None,
             model_name=model_name,
-            process_time=processing_time
+            confidence_score=result.confidence,
+            processing_time_ms=processing_time_ms,
+            analysis_version=analysis_version
         )
 
         return self.analysis_repository.create_analysis(

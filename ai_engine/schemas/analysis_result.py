@@ -9,5 +9,4 @@ class AnalysisResult(BaseModel):
     error: str | None
     prompt: str
     llm_response: str
-    analysis_result: AnalysisResult | None
     confidence: float

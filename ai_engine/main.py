@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.models.contract import Contract , ContractStatus
 from app.repositories.contract_repository import ContractRepository
 
-class AIAnanlysisService:
+class AIAnalysisService:
 
     def __init__(self):
         self.contract_service = ContractRepository()
