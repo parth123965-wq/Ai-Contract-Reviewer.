@@ -3,6 +3,10 @@ from ai_engine.services.embedding_service import EmbeddingService
 from ai_engine.services.text_extractor import TextExtractor
 from ai_engine.services.vector_store_service import VectorStoreService
 from ai_engine.graph.state import ContractState
+from ai_engine.services.prompt_service import PromptService
+from ai_engine.services.llm_service import LLMService
+from ai_engine.services.parser_service import ParserService
+from ai_engine.services.save_analysis import AnalysisService
 
 class ContractNodes:
     
@@ -11,6 +15,10 @@ class ContractNodes:
         self.chunk_service = ChunkService()
         self.embedding_service = EmbeddingService()
         self.vector_store = VectorStoreService()
+        self.prompt_service = PromptService()
+        self.llm_service = LLMService()
+        self.parser_service = ParserService()
+        self.analysis_service = AnalysisService()
         
     def extract_text_node(self,state: ContractState) -> ContractState:
         state['extracted_text'] = self.text_extractor.extract_text(file_path=state['file_path'])
@@ -44,13 +52,32 @@ class ContractNodes:
         return state
     
     def prompt_node(self,state: ContractState) -> ContractState:
-        pass
+        prompt = self.prompt_service.build_prompt(
+            request=state["retrieved_chunks"]
+        )
+        state["prompt"] = prompt
+        return state
     
     def llm_node(self,state: ContractState) -> ContractState:
-        pass
+        response = self.llm_service.generate(
+            prompt=state["prompt"]
+        )
+        state["llm_response"] = response
+        return state
     
     def parser_node(self,state: ContractState) -> ContractState:
-        pass
+        result = self.parser_service.process_json(
+            jsons=state["llm_response"]
+        )
+
+        state["analysis_result"] = result
+        return state
     
     def save_analysis_node(self,state: ContractState) -> ContractState:
-        pass
+        self.analysis_service.save_analysis(
+            db=state["db"],
+            contract_id=state["contract_id"],
+            result=state["analysis_result"]
+        )
+
+        return state

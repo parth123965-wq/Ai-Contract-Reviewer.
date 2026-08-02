@@ -1,4 +1,4 @@
-from fastapi import APIRouter , Depends , UploadFile , File
+from fastapi import APIRouter , Depends , UploadFile , File , BackgroundTasks
 from typing import Annotated 
 from app.database.database import get_db
 from app.dependencies.auth import get_current_user
@@ -6,6 +6,7 @@ from app.services.contract_service import contract_service , ContractService
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.contract import ContractResponse , ContractListResponse
+from app.services.ai_analysis_service import aianalysisservice , AIAnalysisService
 
 contract_router = APIRouter(
     prefix="/contracts",
@@ -16,14 +17,22 @@ contract_router = APIRouter(
 def upload(
     db: Annotated[Session,Depends(get_db)],
     current_user: Annotated[User,Depends(get_current_user)],
-    service: Annotated[ContractService,Depends(contract_service)],
-    file: Annotated[UploadFile,File()]
+    contract_service: Annotated[ContractService,Depends(contract_service)],
+    file: Annotated[UploadFile,File()],
+    background_task: BackgroundTasks,
+    ai_analysis_service: Annotated[AIAnalysisService,Depends(aianalysisservice)]
 ) -> ContractResponse:
-    return service.upload_contract(
+    contract = contract_service.upload_contract(
         db=db,
         current_user=current_user,
         file=file
     )
+    background_task.add_task(
+        ai_analysis_service.analyze_contract,
+        db,
+        contract.id
+    )
+    return contract
     
 @contract_router.get('',response_model=ContractListResponse)
 def get_contracts(

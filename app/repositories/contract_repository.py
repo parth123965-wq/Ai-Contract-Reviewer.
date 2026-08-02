@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select , func
 from typing import Optional
-from app.models.contract import Contract
+from app.models.contract import Contract , ContractAnalysis
 from datetime import datetime , timezone
 
 class ContractRepository:
@@ -57,3 +57,19 @@ class ContractRepository:
             db=db,
             contract=contract
         )
+    
+    def get_next_analysis_version(
+        self,
+        db: Session,
+        contract_id: int
+    ) -> int:
+        latest_version = (
+            db.query(func.max(ContractAnalysis.version))
+            .filter(ContractAnalysis.contract_id == contract_id)
+            .scalar()
+        )
+
+        if latest_version is None:
+            return 1
+
+        return latest_version + 1
