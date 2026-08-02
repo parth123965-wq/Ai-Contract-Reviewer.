@@ -28,8 +28,7 @@ def upload(
         file=file
     )
     background_task.add_task(
-        ai_analysis_service.save_analysis,
-        db,
+        ai_analysis_service.analyze_contract,
         contract.id
     )
     return contract

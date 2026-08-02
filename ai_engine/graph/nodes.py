@@ -77,7 +77,10 @@ class ContractNodes:
         self.analysis_service.save_analysis(
             db=state["db"],
             contract_id=state["contract_id"],
-            result=state["analysis_result"]
+            result=state["analysis_result"],
+            model_name=state.get("model_name"),
+            processing_time_ms=state.get("processing_time_ms", 0),
+            analysis_version=state.get("analysis_version", 1)
         )
 
         return state
