@@ -7,6 +7,7 @@ from ai_engine.services.prompt_service import PromptService
 from ai_engine.services.llm_service import LLMService
 from ai_engine.services.parser_service import ParserService
 from ai_engine.services.save_analysis import AnalysisService
+from app.core.config import settings
 
 class ContractNodes:
     
@@ -78,7 +79,7 @@ class ContractNodes:
             db=state["db"],
             contract_id=state["contract_id"],
             result=state["analysis_result"],
-            model_name=state.get("model_name"),
+            model_name=settings.AI_MODEL_NAME,
             processing_time_ms=state.get("processing_time_ms", 0),
             analysis_version=state.get("analysis_version", 1)
         )

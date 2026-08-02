@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select , func
 from typing import Optional
-from app.models.contract import Contract , ContractAnalysis
+from app.models.contract import Contract , ContractAnalysis , ContractStatus
 from datetime import datetime , timezone
 
 class ContractRepository:
@@ -73,3 +73,14 @@ class ContractRepository:
             return 1
 
         return latest_version + 1
+    
+    def update_status(
+        self,
+        db: Session,
+        contract: Contract,
+        status: ContractStatus
+    ) -> Contract:
+        contract.status = status
+        db.commit()
+        db.refresh(contract)
+        return contract

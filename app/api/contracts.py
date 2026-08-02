@@ -6,7 +6,7 @@ from app.services.contract_service import contract_service , ContractService
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.contract import ContractResponse , ContractListResponse
-from app.services.ai_analysis_service import aianalysisservice , AnalysisService
+from app.services.ai_analysis_service import AnalysisService , get_analysis_service
 
 contract_router = APIRouter(
     prefix="/contracts",
@@ -20,7 +20,7 @@ def upload(
     contract_service: Annotated[ContractService,Depends(contract_service)],
     file: Annotated[UploadFile,File()],
     background_task: BackgroundTasks,
-    ai_analysis_service: Annotated[AnalysisService,Depends(aianalysisservice)]
+    ai_analysis_service: Annotated[AnalysisService,Depends(get_analysis_service)]
 ) -> ContractResponse:
     contract = contract_service.upload_contract(
         db=db,

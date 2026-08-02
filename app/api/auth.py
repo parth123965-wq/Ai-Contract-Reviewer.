@@ -1,4 +1,4 @@
-from fastapi import APIRouter , Depends
+from fastapi import APIRouter , Depends , Response
 from app.database.database import get_db
 from app.services.auth_service import AuthService , auth_service
 from sqlalchemy.orm import Session
@@ -22,28 +22,64 @@ def register_user(
         user=user
     )
     
-@auth_router.post('/login',response_model=LoginResponse)
+@auth_router.post('/login')
 def login(
+    response: Response,
     user: UserLogin,
     db: Annotated[Session,Depends(get_db)],
     service: Annotated[AuthService,Depends(auth_service)]
-) -> LoginResponse:
-    return service.login_user(
+):
+
+    login_response = service.login_user(
         db=db,
         user=user
     )
+
+
+    response.set_cookie(
+        key="ai_contract_session",
+        value=login_response.access_token,
+        httponly=True,
+        samesite="lax",
+        secure=False
+    )
+
+
+    return {
+        "message": "Login successful",
+        "user": login_response.user
+    }
     
-@auth_router.post('/token',response_model=LoginResponse)
+@auth_router.post('/token')
 def token(
+    response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm,Depends()],
     db: Annotated[Session,Depends(get_db)],
     service: Annotated[AuthService,Depends(auth_service)]
-) -> LoginResponse:
+):
+
     user = UserLogin(
         email=form_data.username,
         password=form_data.password
     )
-    return service.login_user(
+
+
+    login_response = service.login_user(
         db=db,
         user=user
     )
+
+
+    response.set_cookie(
+        key="ai_contract_session",
+        value=login_response.access_token,
+        httponly=True,
+        samesite="lax",
+        secure=False
+    )
+
+
+    return {
+        "message": "Login successful",
+        "user": login_response.user
+    }
