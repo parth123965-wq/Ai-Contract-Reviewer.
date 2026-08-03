@@ -56,7 +56,8 @@ def get_contract_by_id(
 ) -> ContractResponse:
     return service.get_contract_by_id(
         db=db,
-        contract_id=contract_id
+        contract_id=contract_id,
+        current_user=current_user   
     )
     
 @contract_router.delete('/{id}')
@@ -68,6 +69,7 @@ def delete_contract(
 ):
     service.delete_contract(
         db=db,
-        contract_id=id
+        contract_id=id,
+        current_user=current_user
     )
     return {"status":"success"}

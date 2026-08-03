@@ -133,11 +133,13 @@ class ContractService:
     def get_contract_by_id(
         self,
         db: Session,
-        contract_id: int
-    ) -> Optional[Contract]:
+        contract_id: int,
+        current_user: User
+    ) -> Contract:
         contract = self.contract_repository.get_contract_by_id(
             db=db,
-            contract_id=contract_id
+            contract_id=contract_id,
+            user_id=current_user.id
         )
         if contract == None:
             raise HTTPException(
@@ -155,11 +157,13 @@ class ContractService:
     def delete_contract(
         self,
         db: Session,
-        contract_id: int
+        contract_id: int,
+        current_user: User
     ) -> Contract:
         contract = self.get_contract_by_id(
             db=db,
-            contract_id=contract_id
+            contract_id=contract_id,
+            current_user=current_user
         )
         return self.contract_repository.soft_delete_contract(
             db=db,

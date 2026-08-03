@@ -19,10 +19,13 @@ class ContractRepository:
     def get_contract_by_id(
         self,
         db: Session,
-        contract_id: int
+        contract_id: int,
+        user_id: int
     ) -> Optional[Contract]:
         statement = select(Contract).where(
-            Contract.id == contract_id
+            Contract.id == contract_id,
+            Contract.user_id == user_id,
+            Contract.is_deleted.is_(False)
         )
         return db.execute(statement=statement).scalar_one_or_none()
     

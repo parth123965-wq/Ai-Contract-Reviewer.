@@ -83,3 +83,14 @@ def token(
         "message": "Login successful",
         "user": login_response.user
     }
+    
+@auth_router.post("/logout")
+def logout(response: Response):
+
+    response.delete_cookie(
+        key="ai_contract_session"
+    )
+
+    return {
+        "message": "Logout successful"
+    }
