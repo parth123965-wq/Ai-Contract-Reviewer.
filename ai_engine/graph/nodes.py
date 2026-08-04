@@ -31,7 +31,10 @@ class ContractNodes:
     
     def embedding_node(self,state: ContractState) -> ContractState:
         state['embeddings'] = self.embedding_service.create_embeddings(chunks=state['chunks'])
-        state['query_embedding'] = state['embeddings'][0]
+        if state['embeddings']:
+            state['query_embedding'] = state['embeddings'][0]
+        else:
+            state['query_embedding'] = []
         return state
     
     def store_vector_node(self,state: ContractState) -> ContractState:

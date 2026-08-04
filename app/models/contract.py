@@ -149,7 +149,8 @@ class ContractAnalysis(Base):
         nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP,
+        DateTime(timezone=True),
+        server_default=func.now(),
         nullable=True
     )
     contract = relationship(

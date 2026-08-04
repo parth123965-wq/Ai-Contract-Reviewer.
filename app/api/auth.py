@@ -47,6 +47,8 @@ def login(
 
     return {
         "message": "Login successful",
+        "access_token": login_response.access_token,
+        "token_type": "bearer",
         "user": login_response.user
     }
     
@@ -81,6 +83,8 @@ def token(
 
     return {
         "message": "Login successful",
+        "access_token": login_response.access_token,
+        "token_type": "bearer",
         "user": login_response.user
     }
     

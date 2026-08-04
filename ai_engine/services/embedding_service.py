@@ -25,7 +25,7 @@ class EmbeddingService:
     ) -> list[list[float]]:
         self._validate_chunks(chunks=chunks)
         try:
-            embeddings = self.model.encode(inputs=chunks)
+            embeddings = self.model.encode(sentences=chunks)
             return embeddings.tolist()
         except Exception as exc:
             raise RuntimeError("Fail to generate embeddings") from exc
