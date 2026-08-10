@@ -20,13 +20,15 @@ class ContractRepository:
         self,
         db: Session,
         contract_id: int,
-        user_id: int
+        user_id: Optional[int] = None
     ) -> Optional[Contract]:
-        statement = select(Contract).where(
+        conditions = [
             Contract.id == contract_id,
-            Contract.user_id == user_id,
             Contract.is_deleted.is_(False)
-        )
+        ]
+        if user_id is not None:
+            conditions.append(Contract.user_id == user_id)
+        statement = select(Contract).where(*conditions)
         return db.execute(statement=statement).scalar_one_or_none()
     
     def get_user_contracts(

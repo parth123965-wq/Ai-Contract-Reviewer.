@@ -12,14 +12,32 @@ except ImportError:
 class LLMService:
     
     def __init__(self):
-        self.api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+        self.api_key = (
+            getattr(settings, "GOOGLE_API_KEY", None)
+            or getattr(settings, "GEMINI_API_KEY", None)
+            or os.getenv("GOOGLE_API_KEY")
+            or os.getenv("GEMINI_API_KEY")
+        )
+        if self.api_key:
+            os.environ["GOOGLE_API_KEY"] = self.api_key
+
         self.model_name = settings.AI_MODEL_NAME
         self.use_stub = False
         if self.api_key and ChatGoogleGenerativeAI is not None:
-            self.llm = ChatGoogleGenerativeAI(
-                model=self.model_name,
-                api_key=self.api_key
-            )
+            try:
+                self.llm = ChatGoogleGenerativeAI(
+                    model=self.model_name,
+                    google_api_key=self.api_key
+                )
+            except Exception:
+                try:
+                    self.llm = ChatGoogleGenerativeAI(
+                        model=self.model_name,
+                        api_key=self.api_key
+                    )
+                except Exception:
+                    self.llm = None
+                    self.use_stub = True
         else:
             self.llm = None
             self.use_stub = True

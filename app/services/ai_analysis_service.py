@@ -69,9 +69,14 @@ class AnalysisService:
                     "query_embedding": [],
                     "retrieved_chunks": [],
 
+                    "summary": "",
+                    "risk_score": 0,
+                    "suggestions": [],
+
                     "prompt": "",
                     "llm_response": "",
                     "analysis_result": None,
+                    "processing_time_ms": 0,
                 }
             )
 

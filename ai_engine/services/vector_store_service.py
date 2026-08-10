@@ -98,7 +98,7 @@ class VectorStoreService:
             result = self.collection.query(
                 query_embeddings=[query_embedding],
                 n_results=top_k,
-                where={"contract_id":contract_id,"user_id":user_id}
+                where={"$and": [{"contract_id": contract_id}, {"user_id": user_id}]}
             )
             documents = result.get("documents",[])
             if not documents:

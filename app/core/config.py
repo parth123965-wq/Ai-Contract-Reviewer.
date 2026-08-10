@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     COLLECTION_NAME: str
     CHROMA_DB_PATH: str
     AI_MODEL_NAME: str
+    GEMINI_API_KEY: str | None = None
+    GOOGLE_API_KEY: str | None = None
     model_config = SettingsConfigDict(
         env_file='.env',
         extra='ignore'

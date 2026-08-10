@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, Any
 from sqlalchemy.orm import Session
 
 class ContractState(TypedDict):
@@ -17,3 +17,7 @@ class ContractState(TypedDict):
     error: str | None
     query_embedding: list[float]
     db: Session
+    prompt: str
+    llm_response: str
+    analysis_result: Any
+    processing_time_ms: int

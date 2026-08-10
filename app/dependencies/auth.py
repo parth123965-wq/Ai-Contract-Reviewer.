@@ -84,6 +84,14 @@ def get_current_user(
             detail="Invalid token payload"
         )
 
+    try:
+        user_id_int = int(user_id)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload"
+        )
+
 
     # ---------------------------------------------------
     # Fetch User
@@ -94,7 +102,7 @@ def get_current_user(
 
     user = user_repository.get_user_by_id(
         db=db,
-        user_id=user_id
+        user_id=user_id_int
     )
 
 
