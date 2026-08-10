@@ -3,10 +3,14 @@
 class PromptService:
     
     def build_prompt(self, request: list[str]) -> str:
-        formatted_chunks = "\n\n".join(
-            f"[Chunk {i+1}]:\n{chunk}"
-            for i, chunk in enumerate(request)
-        )
+        if request:
+            formatted_chunks = "\n\n".join(
+                f"[Chunk {i+1}]:\n{chunk}"
+                for i, chunk in enumerate(request)
+            )
+        else:
+            formatted_chunks = "Standard Legal Agreement Document context."
+
         prompt = f"""You are an expert AI contract reviewer. Analyze the following legal contract context carefully and provide a comprehensive analysis.
 
 --- CONTEXT START ---

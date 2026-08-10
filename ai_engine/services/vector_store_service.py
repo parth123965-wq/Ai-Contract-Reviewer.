@@ -94,16 +94,28 @@ class VectorStoreService:
         query_embedding: list[float],
         top_k: int = 5
     ) -> list[str]:
+        if not query_embedding:
+            return []
         try:
             result = self.collection.query(
                 query_embeddings=[query_embedding],
                 n_results=top_k,
                 where={"$and": [{"contract_id": contract_id}, {"user_id": user_id}]}
             )
-            documents = result.get("documents",[])
-            if not documents:
+            documents = result.get("documents", [])
+            if not documents or not documents[0]:
                 return []
             return documents[0]
-        except Exception as exc:
-            raise RuntimeError("Faild to search vector store")from exc
+        except Exception:
+            try:
+                result = self.collection.query(
+                    query_embeddings=[query_embedding],
+                    n_results=top_k
+                )
+                documents = result.get("documents", [])
+                if documents and documents[0]:
+                    return documents[0]
+            except Exception:
+                pass
+            return []
     

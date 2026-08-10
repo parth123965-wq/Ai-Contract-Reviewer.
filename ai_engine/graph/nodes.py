@@ -48,11 +48,14 @@ class ContractNodes:
         return state
     
     def retrieve_context_node(self,state: ContractState) -> ContractState:
-        state['retrieved_chunks'] = self.vector_store.search(
+        retrieved = self.vector_store.search(
             contract_id=state['contract_id'],
             user_id=state['user_id'],
             query_embedding=state['query_embedding'],
         )
+        if not retrieved and state.get('chunks'):
+            retrieved = state['chunks'][:5]
+        state['retrieved_chunks'] = retrieved
         return state
     
     def prompt_node(self,state: ContractState) -> ContractState:

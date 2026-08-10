@@ -9,23 +9,19 @@ class EmbeddingService:
     def _validate_chunks(
         self,
         chunks: list[str]
-    ) -> None:
-        if any(
-            not isinstance(chunk, str) or not chunk.strip()
-            for chunk in chunks
-        ):
-            raise ValueError("All chunks must contain valid text.")
-        cleaned = [item for item in chunks if isinstance(item,str) and item.strip()]
+    ) -> list[str]:
+        cleaned = [item.strip() for item in chunks if isinstance(item, str) and item.strip()]
         if not cleaned:
-            raise ValueError("Chunk is not contain valid text.")        
+            raise ValueError("No valid text chunks found in document.")
+        return cleaned
         
     def create_embeddings(
         self,
         chunks: list[str]
     ) -> list[list[float]]:
-        self._validate_chunks(chunks=chunks)
+        valid_chunks = self._validate_chunks(chunks=chunks)
         try:
-            embeddings = self.model.encode(sentences=chunks)
+            embeddings = self.model.encode(sentences=valid_chunks)
             return embeddings.tolist()
         except Exception as exc:
-            raise RuntimeError("Fail to generate embeddings") from exc
+            raise RuntimeError("Failed to generate embeddings") from exc
