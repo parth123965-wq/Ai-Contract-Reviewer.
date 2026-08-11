@@ -96,26 +96,66 @@ class VectorStoreService:
     ) -> list[str]:
         if not query_embedding:
             return []
+
+        c_id = int(contract_id)
+        u_id = int(user_id)
+
+        # Helper validator for valid document text chunks
+        def is_valid(doc: str) -> bool:
+            if not isinstance(doc, str):
+                return False
+            s = doc.strip()
+            if len(s) < 3:
+                return False
+            if s.isdigit() and len(s) <= 3:
+                return False
+            return True
+
+        # 1. Try search with contract_id and user_id filter
         try:
             result = self.collection.query(
                 query_embeddings=[query_embedding],
                 n_results=top_k,
-                where={"$and": [{"contract_id": contract_id}, {"user_id": user_id}]}
+                where={"$and": [{"contract_id": c_id}, {"user_id": u_id}]}
             )
-            documents = result.get("documents", [])
-            if not documents or not documents[0]:
-                return []
-            return documents[0]
+            docs = result.get("documents", [])
+            if docs and docs[0]:
+                valid_docs = [d for d in docs[0] if is_valid(d)]
+                if valid_docs:
+                    return valid_docs
         except Exception:
-            try:
-                result = self.collection.query(
-                    query_embeddings=[query_embedding],
-                    n_results=top_k
-                )
-                documents = result.get("documents", [])
-                if documents and documents[0]:
-                    return documents[0]
-            except Exception:
-                pass
-            return []
+            pass
+
+        # 2. Try search with contract_id filter
+        try:
+            result = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where={"contract_id": c_id}
+            )
+            docs = result.get("documents", [])
+            if docs and docs[0]:
+                valid_docs = [d for d in docs[0] if is_valid(d)]
+                if valid_docs:
+                    return valid_docs
+        except Exception:
+            pass
+
+        # 3. Fallback: Search top_k without metadata filter
+        try:
+            result = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k
+            )
+            docs = result.get("documents", [])
+            if docs and docs[0]:
+                valid_docs = [d for d in docs[0] if is_valid(d)]
+                if valid_docs:
+                    return valid_docs
+        except Exception:
+            pass
+
+        return []
+
+
     

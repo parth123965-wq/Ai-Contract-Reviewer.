@@ -37,13 +37,15 @@ def get_current_user(
 
 
     # ---------------------------------------------------
-    # Extract JWT from HttpOnly Cookie
+    # Extract JWT from HttpOnly Cookie or Authorization Header
     # ---------------------------------------------------
 
-    token = request.cookies.get(
-        "ai_contract_session"
-    )
+    token = request.cookies.get("ai_contract_session")
 
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
 
     if token is None:
 
@@ -115,3 +117,26 @@ def get_current_user(
 
 
     return user
+
+
+# =======================================================
+# SECTION 2: CURRENT ADMIN DEPENDENCY
+# =======================================================
+
+
+def get_current_admin(
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> User:
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user account"
+        )
+
+    if not getattr(current_user, "is_admin", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+
+    return current_user

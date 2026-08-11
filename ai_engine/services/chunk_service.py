@@ -31,5 +31,10 @@ class ChunkService:
         text: str
     ) -> list[str]:
         self._validate_text(text=text)
-        chunks = self.splitter.split_text(text=text)
-        return chunks
+        raw_chunks = self.splitter.split_text(text=text)
+        valid_chunks = [
+            c.strip() for c in raw_chunks
+            if isinstance(c, str) and len(c.strip()) >= 3 and not (c.strip().isdigit() and len(c.strip()) <= 3)
+        ]
+        return valid_chunks if valid_chunks else [text.strip()]
+

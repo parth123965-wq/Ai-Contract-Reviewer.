@@ -77,7 +77,7 @@ class LLMService:
                         self.llm = None
 
     def generate(self, prompt: str) -> str:
-        candidate_models = [self.model_name, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
+        candidate_models = [self.model_name, "gemini-flash-latest", "gemini-2.5-flash", "gemini-pro-latest", "gemini-2.5-pro", "gemini-1.5-flash"]
         
         # 1. Try modern google.genai Client with model candidates
         if self.genai_client is not None:
@@ -135,6 +135,82 @@ class LLMService:
 
         # 4. Dynamic Analysis Fallback: Extract insights directly from actual uploaded contract text
         return self._analyze_text_dynamically(prompt)
+
+    def ask_question(self, question: str, context_chunks: list[str]) -> str:
+        """Answers a specific user question using vector-retrieved context chunks (RAG)."""
+        valid_chunks = [
+            c.strip() for c in context_chunks
+            if isinstance(c, str) and len(c.strip()) >= 3 and not (c.strip().isdigit() and len(c.strip()) <= 3)
+        ]
+        context_text = "\n\n".join(valid_chunks) if valid_chunks else "No document text available."
+        prompt = f"""You are a helpful AI contract assistant. Answer the user's question using ONLY the provided document context below.
+
+Context from Document:
+{context_text}
+
+Question: {question}
+
+Provide a direct, clear, and natural answer without any generic placeholders or code snippets:"""
+
+        candidate_models = [self.model_name, "gemini-flash-latest", "gemini-2.5-flash", "gemini-pro-latest", "gemini-2.5-pro", "gemini-1.5-flash"]
+
+        # 1. Try modern genai SDK
+        if self.genai_client is not None:
+            for target_model in candidate_models:
+                try:
+                    res = self.genai_client.models.generate_content(model=target_model, contents=prompt)
+                    if res and res.text and len(res.text.strip()) > 3:
+                        return res.text.strip()
+                except Exception as exc:
+                    err_str = str(exc)
+                    if "404" not in err_str:
+                        break
+
+        # 2. Try legacy genai SDK
+        if legacy_genai is not None:
+            for target_model in candidate_models:
+                try:
+                    g_model = legacy_genai.GenerativeModel(target_model)
+                    res = g_model.generate_content(prompt)
+                    if res and res.text and len(res.text.strip()) > 3:
+                        return res.text.strip()
+                except Exception as exc:
+                    err_str = str(exc)
+                    if "404" not in err_str:
+                        break
+
+        # 3. Intelligent RAG Search Fallback (when Gemini API rate limit occurs)
+        if not valid_chunks:
+            return "No document text available to answer your question."
+
+        stopwords = {"what", "when", "where", "who", "which", "how", "why", "is", "are", "was", "were", "the", "a", "an", "for", "and", "or", "in", "on", "at", "to", "of", "with", "by", "give", "show", "tell", "please", "can", "you", "me"}
+        q_words = [w.lower() for w in re.findall(r"\b\w{1,}\b", question) if w.lower() not in stopwords]
+
+        matching_lines = []
+        for chunk in valid_chunks:
+            lines = [l.strip() for l in re.split(r"[\n\.]", chunk) if len(l.strip()) >= 3]
+            for line in lines:
+                l_lower = line.lower()
+                matches = sum(1 for qw in q_words if qw in l_lower)
+                if matches > 0:
+                    matching_lines.append((matches, line))
+
+        if matching_lines:
+            matching_lines.sort(key=lambda x: x[0], reverse=True)
+            best_matches = list(dict.fromkeys([m[1] for m in matching_lines]))[:5]
+            return "Based on the document text:\n• " + "\n• ".join(best_matches)
+
+        all_sentences = []
+        for chunk in valid_chunks:
+            all_sentences.extend([l.strip() for l in re.split(r"[\n\.]", chunk) if len(l.strip()) >= 5])
+
+        if all_sentences:
+            chosen = all_sentences[:3]
+            return "Relevant section from document:\n• " + "\n• ".join(chosen)
+
+
+        return "I could not find specific information matching your question in the uploaded document."
+
 
     def _analyze_text_dynamically(self, text: str) -> str:
         """Dynamically analyzes the text of the actual uploaded contract to produce unique metrics and summaries."""
