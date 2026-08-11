@@ -99,14 +99,24 @@ class ContractRepository:
         user_id: Optional[int] = None,
         search: Optional[str] = None
     ) -> list[Contract]:
-        statement = select(Contract).where(Contract.is_deleted.is_(False))
+        from app.models.user import User
+        from sqlalchemy import or_
+        statement = select(Contract).outerjoin(User, Contract.user_id == User.id).where(Contract.is_deleted.is_(False))
         if status:
             statement = statement.where(Contract.status == status)
         if user_id:
             statement = statement.where(Contract.user_id == user_id)
-        if search:
-            search_pattern = f"%{search}%"
-            statement = statement.where(Contract.original_filename.ilike(search_pattern))
+        if search and search.strip():
+            clean_search = search.strip()
+            search_pattern = f"%{clean_search}%"
+            conditions = [
+                Contract.original_filename.ilike(search_pattern),
+                User.username.ilike(search_pattern),
+                User.email.ilike(search_pattern)
+            ]
+            if clean_search.isdigit():
+                conditions.append(Contract.id == int(clean_search))
+            statement = statement.where(or_(*conditions))
         statement = statement.order_by(Contract.id.desc()).offset(skip).limit(limit)
         return list(db.execute(statement).scalars().all())
 
@@ -117,14 +127,24 @@ class ContractRepository:
         user_id: Optional[int] = None,
         search: Optional[str] = None
     ) -> int:
-        statement = select(func.count(Contract.id)).where(Contract.is_deleted.is_(False))
+        from app.models.user import User
+        from sqlalchemy import or_
+        statement = select(func.count(Contract.id)).outerjoin(User, Contract.user_id == User.id).where(Contract.is_deleted.is_(False))
         if status:
             statement = statement.where(Contract.status == status)
         if user_id:
             statement = statement.where(Contract.user_id == user_id)
-        if search:
-            search_pattern = f"%{search}%"
-            statement = statement.where(Contract.original_filename.ilike(search_pattern))
+        if search and search.strip():
+            clean_search = search.strip()
+            search_pattern = f"%{clean_search}%"
+            conditions = [
+                Contract.original_filename.ilike(search_pattern),
+                User.username.ilike(search_pattern),
+                User.email.ilike(search_pattern)
+            ]
+            if clean_search.isdigit():
+                conditions.append(Contract.id == int(clean_search))
+            statement = statement.where(or_(*conditions))
         return db.execute(statement).scalar() or 0
 
     def count_contracts_by_status(self, db: Session) -> dict:

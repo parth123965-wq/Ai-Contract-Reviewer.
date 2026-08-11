@@ -102,9 +102,11 @@ class AdminService:
                 )
             )
 
+        pages = max(1, (total + limit - 1) // limit) if limit > 0 else 1
         return AdminUserListResponse(
             total=total,
             page=page,
+            pages=pages,
             limit=limit,
             users=user_details
         )
@@ -169,9 +171,11 @@ class AdminService:
                 resp.user_email = c.user.email
             contract_responses.append(resp)
 
+        pages = max(1, (total + limit - 1) // limit) if limit > 0 else 1
         return AdminContractListResponse(
             total=total,
             page=page,
+            pages=pages,
             limit=limit,
             contracts=contract_responses
         )

@@ -141,12 +141,19 @@ def list_contracts(
     service: Annotated[AdminService, Depends(get_admin_service)],
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
-    status: Optional[ContractStatus] = Query(default=None),
+    status: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
     search: Optional[str] = Query(default=None)
 ) -> AdminContractListResponse:
+    parsed_status = None
+    if status and status.strip() and status.lower() != "all":
+        try:
+            parsed_status = ContractStatus(status.strip().upper())
+        except ValueError:
+            parsed_status = None
+
     return service.list_contracts(
-        db=db, page=page, limit=limit, status_filter=status, user_id=user_id, search=search
+        db=db, page=page, limit=limit, status_filter=parsed_status, user_id=user_id, search=search
     )
 
 
@@ -168,7 +175,12 @@ def update_contract_status(
     db: Annotated[Session, Depends(get_db)],
     service: Annotated[AdminService, Depends(get_admin_service)]
 ) -> ContractResponse:
-    return service.update_contract_status(db=db, contract_id=contract_id, new_status=body.status)
+    try:
+        new_status = ContractStatus(body.status.strip().upper())
+    except ValueError:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=f"Invalid contract status: {body.status}")
+    return service.update_contract_status(db=db, contract_id=contract_id, new_status=new_status)
 
 
 @admin_router.delete("/contracts/{contract_id}")

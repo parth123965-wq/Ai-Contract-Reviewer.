@@ -16,6 +16,7 @@ class UserAdminDetailResponse(UserResponse):
 class AdminUserListResponse(BaseModel):
     total: int
     page: int
+    pages: int = 1
     limit: int
     users: List[UserAdminDetailResponse]
 
@@ -32,11 +33,12 @@ class ContractAdminDetailResponse(ContractResponse):
 class AdminContractListResponse(BaseModel):
     total: int
     page: int
+    pages: int = 1
     limit: int
     contracts: List[ContractAdminDetailResponse]
 
 class ContractStatusUpdate(BaseModel):
-    status: ContractStatus
+    status: str
 
 class AdminDashboardStats(BaseModel):
     total_users: int
